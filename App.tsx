@@ -32,6 +32,34 @@ import {
   Comment
 } from './types';
 
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
+
+async function saveUser(snowedInNumber: string) {
+  const { data: existingUser, error: selectError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("snowed_in_number", snowedInNumber)
+    .single();
+
+  if (selectError && selectError.code !== "PGRST116") {
+    console.error(selectError);
+    return;
+  }
+
+  if (!existingUser) {
+    await supabase
+      .from("users")
+      .insert([{ snowed_in_number: snowedInNumber }]);
+  }
+
+  localStorage.setItem("snowedInNumber", snowedInNumber);
+}
+
 // Declare Gun global from script tag
 declare global {
   interface Window {
@@ -353,16 +381,19 @@ const App: React.FC = () => {
                 maxLength={6}
                 value={snowedInID}
                 onChange={(e) => setSnowedInID(e.target.value)}
-                placeholder="Ex: 3302" 
+                placeholder="Ex: 0000" 
                 className="w-full p-4 bg-white/50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-center text-lg font-mono tracking-[0.2em] shadow-sm"
               />
               <p className="text-[10px] text-slate-400 mt-2 italic text-center">*Connect with neighbors by your unique complex ID.</p>
             </div>
           </div>
 
-          <button 
-            onClick={handleAuth}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transform transition active:scale-95"
+<button
+  onClick={async () => {
+    await saveUser(snowedInNumber);
+    enterComplex();
+  }}          
+  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transform transition active:scale-95"
           >
             Enter Complex
           </button>
