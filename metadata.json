@@ -1,0 +1,7 @@
+{
+  "name": "Snowed In",
+  "description": "A cozy, exclusive social network for residents of the Snowed In complex. Connect with your neighbors across 12 apartments, share photos of your snowed-in life, and chat with fellow residents.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
